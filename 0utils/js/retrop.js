@@ -9,15 +9,21 @@ function verifierCode(event) {
 
     blocErreur.style.display = "none";
 
-    // Envoi au format texte brut pour que le vieux PHP de Free ne panique pas
+    // Formatage strict du texte pour que l'expression régulière du vieux PHP 5.1 le lise à coup sûr
+    const corpsRequete = '"code":"' + codeSaisi + '"';
+
     fetch('http://gfait.free.fr/retrop/0utils/php/api.php', {
         method: 'POST',
         mode: 'cors',
-        body: JSON.stringify({ code: codeSaisi })
+        headers: {
+            'Content-Type': 'text/plain; charset=UTF-8' // Envoi en texte brut pour éviter les blocages CORS complexes
+        },
+        body: corpsRequete
     })
     .then(response => response.json())
     .then(data => {
         if (data.status === "success") {
+            // Le code correspond ! On ouvre l'application
             ecranConnexion.style.display = "none";
             document.body.style.alignItems = "flex-start";
             
@@ -28,6 +34,7 @@ function verifierCode(event) {
 
             pageApplication.style.display = "block";
         } else {
+            // Le code est refusé par le PHP
             blocErreur.style.display = "block";
             blocErreur.innerText = data.message || "Code d'accès incorrect.";
             document.getElementById('code-input').value = "";
@@ -35,7 +42,8 @@ function verifierCode(event) {
         }
     })
     .catch(error => {
-        console.error("Erreur :", error);
+        console.error("Erreur de protocole :", error);
+        // Affichage du message d'autorisation si le navigateur bloque le HTTP
         blocErreur.style.display = "block";
         blocErreur.innerHTML = "Le navigateur bloque la connexion sécurisée.<br><br>" +
                                "<a href='http://gfait.free.fr/retrop/0utils/php/api.php' target='_blank' style='color:#e74c3c; font-weight:bold;'>Cliquez ici une fois pour autoriser Free</a>, puis réessayez.";

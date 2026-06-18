@@ -1,35 +1,23 @@
 /* 0utils/js/retrop.js */
 function verifierCode(event) {
-    // Empêche la page de se recharger lors de la soumission du formulaire
     event.preventDefault();
     
-    // Récupère la valeur tapée par l'utilisateur
     const codeSaisi = document.getElementById('code-input').value;
     const ecranConnexion = document.getElementById('ecran-connexion');
     const pageApplication = document.getElementById('page-application');
     const blocErreur = document.getElementById('bloc-erreur');
 
-    // Masquer le message d'erreur précédent s'il y en avait un
     blocErreur.style.display = "none";
 
-    // APPEL FORCE VERS LE SERVEUR FREE (Contournement du blocage HTTPS/HTTP)
+    // Envoi au format texte brut pour que le vieux PHP de Free ne panique pas
     fetch('http://gfait.free.fr/retrop/0utils/php/api.php', {
         method: 'POST',
-        mode: 'cors', // Force le navigateur à ignorer les restrictions d'origine
-        headers: {
-            'Content-Type': 'application/json'
-        },
+        mode: 'cors',
         body: JSON.stringify({ code: codeSaisi })
     })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error("Réponse serveur non valide");
-        }
-        return response.json();
-    })
+    .then(response => response.json())
     .then(data => {
         if (data.status === "success") {
-            // Le code existe dans la table MySQL !
             ecranConnexion.style.display = "none";
             document.body.style.alignItems = "flex-start";
             
@@ -40,7 +28,6 @@ function verifierCode(event) {
 
             pageApplication.style.display = "block";
         } else {
-            // Le code est inconnu
             blocErreur.style.display = "block";
             blocErreur.innerText = data.message || "Code d'accès incorrect.";
             document.getElementById('code-input').value = "";
@@ -48,10 +35,7 @@ function verifierCode(event) {
         }
     })
     .catch(error => {
-        console.error("Détail de l'erreur :", error);
-        
-        // PLAN B SI LE NAVIGATEUR BLOQUE LE HTTP SANS DEMANDER :
-        // Si le mode automatique échoue à cause du HTTPS, on prévient l'utilisateur d'un clic
+        console.error("Erreur :", error);
         blocErreur.style.display = "block";
         blocErreur.innerHTML = "Le navigateur bloque la connexion sécurisée.<br><br>" +
                                "<a href='http://gfait.free.fr/retrop/0utils/php/api.php' target='_blank' style='color:#e74c3c; font-weight:bold;'>Cliquez ici une fois pour autoriser Free</a>, puis réessayez.";

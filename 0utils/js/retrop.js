@@ -1,52 +1,41 @@
 /* 0utils/js/retrop.js */
+// Fonction pour vérifier le mot de passe
+async function verifierMotDePasse() {
+    const codeSaisi = document.getElementById("inputCode").value; // Assurez-vous d'avoir un input avec cet ID
 
-// Cette fonction globale va recevoir la réponse directe de Free, sans blocage de sécurité
-function gererReponseFree(data) {
-    const ecranConnexion = document.getElementById('ecran-connexion');
-    const pageApplication = document.getElementById('page-application');
-    const blocErreur = document.getElementById('bloc-erreur');
-    
-    // On nettoie la balise temporaire de script
-    const baliseTemp = document.getElementById('script-jsonp-free');
-    if (baliseTemp) baliseTemp.remove();
+    if (!codeSaisi) {
+        alert("Veuillez entrer un code.");
+        return;
+    }
 
-    if (data.status === "success") {
-        ecranConnexion.style.display = "none";
-        document.body.style.alignItems = "flex-start";
-        
-        const welcomeBox = document.querySelector('.welcome-box');
-        if (welcomeBox) {
-            welcomeBox.innerHTML = `Bravo ! Connexion réussie. Bienvenue, <strong>${data.nom}</strong> !`;
+    try {
+        const reponse = await fetch('https://gfait.free.fr/0utils/php/apiretrop.php', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ code: codeSaisi })
+        });
+
+        const donnees = await reponse.json();
+
+        if (donnees.status === "success") {
+            // Succès : Masquer la connexion, afficher le contenu
+            document.getElementById("zoneConnexion").style.display = "none";
+            document.getElementById("zoneContenu").style.display = "block";
+            document.getElementById("bienvenue").textContent = `Bienvenue, ${donnees.nom} (${donnees.role})`;
+        } else {
+            // Échec : Afficher le message d'erreur
+            document.getElementById("erreur").textContent = donnees.message;
+            document.getElementById("erreur").style.display = "block";
         }
-        pageApplication.style.display = "block";
-    } else {
-        blocErreur.style.display = "block";
-        blocErreur.innerText = data.message || "Code d'accès incorrect.";
-        document.getElementById('code-input').value = "";
-        document.getElementById('code-input').focus();
+
+    } catch (erreur) {
+        console.error("Erreur de connexion :", erreur);
+        document.getElementById("erreur").textContent = "Erreur de connexion au serveur.";
+        document.getElementById("erreur").style.display = "block";
     }
 }
 
-function verifierCode(event) {
-    event.preventDefault();
-    
-    const codeSaisi = document.getElementById('code-input').value;
-    const blocErreur = document.getElementById('bloc-erreur');
-    blocErreur.style.display = "none";
-
-    // On crée une balise <script> magique pour interroger Free sans blocage HTTPS/HTTP
-    const script = document.createElement('script');
-    script.id = 'script-jsonp-free';
-
-// Remplacez http par https à cette ligne dans votre retrop.js :
-script.src = 'https://gfait.free.fr/retrop/0utils/php/api.php?code=' + encodeURIComponent(codeSaisi);
-
-    // En cas de panne totale du serveur Free
-    script.onerror = function() {
-        blocErreur.style.display = "block";
-        blocErreur.innerHTML = "Impossible de joindre le serveur de validation Free.";
-    };
-
-    // On injecte le script dans la page pour lancer la vérification
-    document.body.appendChild(script);
-}
+// Appel de la fonction quand on clique sur un bouton (ex: "Valider")
+// Vous devez ajouter un bouton dans votre HTML avec onclick="verifierMotDePasse()"

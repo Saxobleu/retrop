@@ -37,8 +37,10 @@ function verifierCode(event) {
     // On crée une balise <script> magique pour interroger Free sans blocage HTTPS/HTTP
     const script = document.createElement('script');
     script.id = 'script-jsonp-free';
-    script.src = 'http://gfait.free.fr/retrop/0utils/php/api.php?code=' + encodeURIComponent(codeSaisi);
-    
+
+// Remplacez http par https à cette ligne dans votre retrop.js :
+script.src = 'https://gfait.free.fr/retrop/0utils/php/api.php?code=' + encodeURIComponent(codeSaisi);
+
     // En cas de panne totale du serveur Free
     script.onerror = function() {
         blocErreur.style.display = "block";

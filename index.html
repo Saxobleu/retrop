@@ -4,8 +4,37 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <meta name="Robots" content="none">
-    <title>Grain de sel</title>
+    <title>Rétroplanning PRO</title>
     <link rel="stylesheet" href="0utils/css/styleretrop.css">
+    <style>
+        /* Styles complémentaires issus du fichier de test pour l'application */
+        nav { background-color: #2c3e50; color: white; padding: 15px; position: fixed; width: 100%; top: 0; left: 0; z-index: 1000; box-shadow: 0 2px 5px rgba(0,0,0,0.1); box-sizing: border-box; }
+        nav .welcome { font-weight: bold; margin-bottom: 10px; color: #1abc9c; }
+        nav ul { list-style: none; margin: 0; padding: 0; display: flex; gap: 20px; }
+        nav ul li { position: relative; cursor: pointer; }
+        nav ul li:hover { color: #1abc9c; }
+        
+        .submenu { display: none; position: absolute; background: white; color: #333; padding: 10px; border-radius: 4px; box-shadow: 0 4px 8px rgba(0,0,0,0.1); top: 20px; min-width: 150px; }
+        .has-submenu:hover .submenu { display: block; }
+        .submenu li { padding: 5px 0; color: #333; }
+        .submenu li:hover { color: #2980b9; }
+
+        .container { margin-top: 100px; padding: 20px; max-width: 1200px; margin-left: auto; margin-right: auto; }
+        .page { display: none; }
+        .page.active { display: block; }
+        
+        h2 { border-bottom: 2px solid #2c3e50; padding-bottom: 8px; color: #2c3e50; }
+        .section-taches { background: white; padding: 15px; margin-bottom: 20px; border-radius: 6px; box-shadow: 0 2px 4px rgba(0,0,0,0.05); border-left: 5px solid #bdc3c7; }
+        .en-retard { border-left-color: #e74c3c; }
+        .du-jour { border-left-color: #2ecc71; }
+        .prochaines { border-left-color: #3498db; }
+        
+        table { width: 100%; border-collapse: collapse; margin-top: 15px; background: white; }
+        th, td { padding: 12px; text-align: left; border-bottom: 1px solid #ddd; }
+        th { background-color: #34495e; color: white; }
+        tr:hover { background-color: #f9f9f9; }
+        .planning-header { background: #34495e; color: white; padding: 15px; border-radius: 6px; margin-bottom: 20px; display: flex; justify-content: space-between; }
+    </style>
 </head>
 <body>
 
@@ -21,14 +50,120 @@
         <div id="bloc-erreur" class="error-message">Code d'accès incorrect.</div>
     </div>
 
-    <div id="page-application">
-        <div class="welcome-box">
-            Bravo ! Connexion réussie à la page de test.
-        </div>
-        <div style="margin-top: 30px; background: white; padding: 25px; border-radius: 6px; box-shadow: 0 2px 5px rgba(0,0,0,0.05);">
-            <h2>Espace Rétroplanning</h2>
-            <p>Cet écran est la zone sécurisée. C'est ici que nous injecterons le menu persistant et les tableaux d'Eugène, Letizia et Gérard dès que la passerelle avec Free sera en place.</p>
-            <p>Le code d'accès utilisé : <strong>t3st</strong></p>
+    <div id="page-application" style="display: none;">
+        
+        <nav>
+            <div id="bienvenue-message" class="welcome">Chargement utilisateur...</div>
+            <ul>
+                <li onclick="showPage('accueil')">Accueil</li>
+                <li class="has-submenu">
+                    Choix du rétroplanning ▾
+                    <ul class="submenu">
+                        <li onclick="showPage('retro-general')">Général (Tous)</li>
+                        <li onclick="showPage('retro-ag')">AG 2026</li>
+                    </ul>
+                </li>
+                <li onclick="showPage('messages')">Messages</li>
+                <li onclick="showPage('mentions')">Mentions</li>
+            </ul>
+        </nav>
+
+        <div class="container">
+
+            <div id="accueil" class="page active">
+                <div class="welcome-box">
+                    Bravo ! Connexion réussie à l'espace de gestion.
+                </div>
+                
+                <div class="section-taches en-retard" style="margin-top:20px;">
+                    <h2>1/ Tâches en retard</h2>
+                    <p><em>Aucune tâche en retard (Exemple)</em></p>
+                </div>
+                
+                <div class="section-taches du-jour">
+                    <h2>2/ Tâches du jour</h2>
+                    <p><em>Rien à faire aujourd'hui, profitez !</em></p>
+                </div>
+                
+                <div class="section-taches prochaines">
+                    <h2>3/ Les 10 prochaines tâches</h2>
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>Planning</th>
+                                <th>Date limite de l'action</th>
+                                <th>Action (100 car.)</th>
+                                <th>Fait</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr>
+                                <td>AG 2026</td>
+                                <td>31/08/2026</td>
+                                <td>Envoyer les convocations officielles aux membres</td>
+                                <td><input type="checkbox"></td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div id="retro-ag" class="page">
+                <div class="planning-header">
+                    <span><strong>Responsable :</strong> En cours...</span>
+                    <span><strong>Planning :</strong> AG 2026</span>
+                    <span><strong>Échéance finale :</strong> 20/09/2026</span>
+                </div>
+                
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Date de l'action</th>
+                            <th>Action</th>
+                            <th>Moyen de vérification (50 car.)</th>
+                            <th>Fait</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td>31/08/2026 <small>(-20 jours)</small></td>
+                            <td>Envoyer les convocations officielles aux membres</td>
+                            <td>Émargement de la liste d'envoi de la Poste</td>
+                            <td><input type="checkbox"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="retro-general" class="page">
+                <h2>Rétroplanning Général (Toutes vos tâches matérialisées par date)</h2>
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Nom du Planning</th>
+                            <th>Échéance finale</th>
+                            <th>Date de l'action</th>
+                            <th>Action</th>
+                            <th>Moyen de vérification</th>
+                            <th>Fait</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        <tr>
+                            <td><strong>AG 2026</strong></td>
+                            <td>20/09/2026</td>
+                            <td>31/08/2026 <small>(-20j)</small></td>
+                            <td>Envoyer les convocations officielles aux membres</td>
+                            <td>Émargement liste d'envoi</td>
+                            <td><input type="checkbox"></td>
+                        </tr>
+                    </tbody>
+                </table>
+            </div>
+
+            <div id="messages" class="page"><h2>Messages</h2><p>Espace de communication ou consignes de l'administrateur (Gérard).</p></div>
+            <div id="mentions" class="page"><h2>Mentions</h2><p>Informations légales ou notes de version de l'application.</p></div>
+
         </div>
     </div>
 

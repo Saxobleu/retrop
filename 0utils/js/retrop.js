@@ -25,7 +25,7 @@ async function verifierCode(event) {
 
     try {
         // Interrogation native en POST vers Free (PHP 5.6)
-        const reponse = await fetch('https://gfait.free.fr/retrop/0utils/php/apiretrop.php', {
+        const reponse = await fetch('http://gfait.free.fr/retrop/0utils/php/apiretrop.php', {
             method: 'POST',
             headers: {
                 'Content-Type': 'application/json'
@@ -59,7 +59,7 @@ async function verifierCode(event) {
     } catch (erreur) {
         console.error("Erreur réseau :", erreur);
         blocErreur.innerHTML = "Le navigateur bloque le flux non sécurisé.<br><br>" +
-                               "<a href='https://gfait.free.fr/retrop/0utils/php/apiretrop.php' target='_blank' style='color:#e74c3c; font-weight:bold;'>Cliquez ici pour accepter le certificat Free</a>, puis réessayez.";
+                               "<a href='http://gfait.free.fr/retrop/0utils/php/apiretrop.php' target='_blank' style='color:#e74c3c; font-weight:bold;'>Cliquez ici pour accepter le certificat Free</a>, puis réessayez.";
         blocErreur.style.display = "block";
     }
 }

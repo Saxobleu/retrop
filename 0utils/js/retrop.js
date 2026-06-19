@@ -1,6 +1,6 @@
 /* 0utils/js/retrop.js */
 
-// Fonction de navigation entre les onglets de l'application
+// 1. Fonction de navigation entre les onglets
 function showPage(pageId) {
     const pages = document.querySelectorAll('.page');
     pages.forEach(page => page.classList.remove('active'));
@@ -11,55 +11,55 @@ function showPage(pageId) {
     }
 }
 
-// Fonction de vérification du code au clic ou soumission du formulaire
-async function verifierCode(event) {
-    event.preventDefault(); // Empêche le rechargement de la page
-    
-    const codeSaisi = document.getElementById("code-input").value;
+// 2. Fonction magique GLOBALE qui reçoit la réponse de Free
+function gererReponseFree(donnees) {
     const ecranConnexion = document.getElementById("ecran-connexion");
     const pageApplication = document.getElementById("page-application");
     const blocErreur = document.getElementById("bloc-erreur");
     const zoneMessageBienvenue = document.getElementById("bienvenue-message");
 
-    blocErreur.style.display = "none";
+    // Nettoyage de la balise temporaire
+    const baliseTemp = document.getElementById('script-jsonp-free');
+    if (baliseTemp) baliseTemp.remove();
 
-    try {
-        // Interrogation native en POST vers Free (PHP 5.6)
-        const reponse = await fetch('http://gfait.free.fr/retrop/0utils/php/apiretrop.php', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json'
-            },
-            body: JSON.stringify({ code: codeSaisi })
-        });
-
-        const donnees = await reponse.json();
-
-        if (donnees.status === "success") {
-            // 1. Masquer l'écran de verrouillage
-            ecranConnexion.style.display = "none";
-            
-            // 2. Modifier l'alignement global pour le menu persistant
-            document.body.style.alignItems = "flex-start";
-            document.body.style.display = "block"; 
-            
-            // 3. Injecter le message de bienvenue personnalisé
-            if (zoneMessageBienvenue) {
-                zoneMessageBienvenue.textContent = `Salut ${donnees.nom}, bienvenue !`;
-            }
-            
-            // 4. Déployer l'application
-            pageApplication.style.display = "block";
-        } else {
-            // Affichage de l'erreur renvoyée par PHP
-            blocErreur.textContent = donnees.message || "Code d'accès incorrect.";
-            blocErreur.style.display = "block";
+    if (donnees.status === "success") {
+        // Connexion réussie ! On bascule l'affichage
+        ecranConnexion.style.display = "none";
+        document.body.style.alignItems = "flex-start";
+        document.body.style.display = "block"; 
+        
+        if (zoneMessageBienvenue) {
+            zoneMessageBienvenue.textContent = `Salut ${donnees.nom}, bienvenue !`;
         }
-
-    } catch (erreur) {
-        console.error("Erreur réseau :", erreur);
-        blocErreur.innerHTML = "Le navigateur bloque le flux non sécurisé.<br><br>" +
-                               "<a href='http://gfait.free.fr/retrop/0utils/php/apiretrop.php' target='_blank' style='color:#e74c3c; font-weight:bold;'>Cliquez ici pour accepter le certificat Free</a>, puis réessayez.";
+        
+        pageApplication.style.display = "block";
+    } else {
+        // Erreur renvoyée par le PHP
+        blocErreur.textContent = donnees.message || "Code d'accès incorrect.";
         blocErreur.style.display = "block";
     }
+}
+
+// 3. Déclencheur lors de la soumission du formulaire
+function verifierCode(event) {
+    event.preventDefault(); 
+    
+    const codeSaisi = document.getElementById("code-input").value;
+    const blocErreur = document.getElementById("bloc-erreur");
+
+    blocErreur.style.display = "none";
+
+    // On crée une balise <script> dynamique pour contourner le blocage HTTPS -> HTTP
+    const script = document.createElement('script');
+    script.id = 'script-jsonp-free';
+    script.src = 'http://gfait.free.fr/retrop/0utils/php/apiretrop.php?code=' + encodeURIComponent(codeSaisi);
+    
+    // Si Free est totalement en panne
+    script.onerror = function() {
+        blocErreur.style.display = "block";
+        blocErreur.innerHTML = "Impossible de joindre le serveur Free.";
+    };
+
+    // Injection dans la page pour lancer la requête
+    document.body.appendChild(script);
 }
